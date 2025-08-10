@@ -3,6 +3,7 @@ trigger:
     include: [ main ]
 
 pool:
+  name: local-wsl
   vmImage: 'ubuntu-latest'
 
 variables:
@@ -19,6 +20,9 @@ steps:
     curl -fsSL https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64 -o terragrunt
     chmod +x terragrunt && sudo mv terragrunt /usr/local/bin/
   displayName: Install Terraform & Terragrunt
+- bash: |
+    sudo apt-get update && sudo apt-get install -y unzip
+  displayName: Ensure unzip
 
 - bash: |
     set -e
