@@ -1,20 +1,40 @@
-trigger:none
+trigger: none
 
 pool:
-  vmImage: 'ubuntu-latest'
-variables: 
-   AWS_REGION:'us-west-2'
-   S3_BUCKET: 'vijs29-tfstate-dev'
+  vmImage: ubuntu-latest
+
+variables:
+  AWS_REGION: 'us-west-2'
+  S3_BUCKET: 'vijs29-tfstate-dev'
 
 steps:
 - checkout: self
 
+# Sanity: show identity (helps catch any auth/region oddities)
 - task: AWSCLI@1
-  displayName: 'S3read:list state prefixes'
+  displayName: 'STS: get-caller-identity'
   inputs:
-    awsCredentials: 'ado-terraform-session'  # Name of your service connection
+    awsCredentials: 'ado-terraform-session'
+    regionName: '$(AWS_REGION)'
+    awsCommand: 'sts'
+    awsSubCommand: 'get-caller-identity'
+
+# Optional: confirm the bucket’s actual region
+- task: AWSCLI@1
+  displayName: 'S3: get-bucket-location'
+  inputs:
+    awsCredentials: 'ado-terraform-session'
+    regionName: '$(AWS_REGION)'
+    awsCommand: 's3api'
+    awsSubCommand: 'get-bucket-location'
+    awsArguments: '--bucket $(S3_BUCKET)'
+
+# List your prefixes (fix: use s3://)
+- task: AWSCLI@1
+  displayName: 'S3 read: list state prefixes'
+  inputs:
+    awsCredentials: 'ado-terraform-session'
     regionName: '$(AWS_REGION)'
     awsCommand: 's3'
     awsSubCommand: 'ls'
-    awsArguments: 's3//$(S3_BUCKET)/states/'
-    #command: 'sts get-caller-identity'
+    awsArguments: 's3://$(S3_BUCKET)/states/'
