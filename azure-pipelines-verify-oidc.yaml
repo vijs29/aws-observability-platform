@@ -38,3 +38,4 @@ steps:
     awsCommand: 's3'
     awsSubCommand: 'ls'
     awsArguments: 's3://$(S3_BUCKET)/states/'
+
