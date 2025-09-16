@@ -1,16 +1,20 @@
-trigger:
-  branches:
-    include:
-      - main
+trigger:none
 
 pool:
   vmImage: 'ubuntu-latest'
+variables: 
+   AWS_REGION:'us-west-2'
+   S3_BUCKET: 'vijs29-tfstate-dev'
 
 steps:
 - checkout: self
 
 - task: AWSCLI@1
+  displayName: 'S3read:list state prefixes'
   inputs:
     awsCredentials: 'ado-terraform-session'  # Name of your service connection
-    regionName: 'us-west-2'
-    command: 'sts get-caller-identity'
+    regionName: '$(AWS_REGION)'
+    awsCommand: 's3'
+    awsSubCommand: 'ls'
+    awsArguments: 's3//$(S3_BUCKET)/states/'
+    #command: 'sts get-caller-identity'
